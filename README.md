@@ -9,7 +9,7 @@
 
 ## 🎯 Overview
 
-[![LiveSite](https://alignedwithwhat.com)]
+([Live site with evals](https://alignedwithwhat.com))
 
 **AlignedWithWhat** is an AI alignment research platform that tests how language models respond to ethically complex, adversarial scenarios. The system presents the **same conflict from opposing perspectives** to measure behavioral consistency, ethical reasoning, and susceptibility to manipulation.
 
