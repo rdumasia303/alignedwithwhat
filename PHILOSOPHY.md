@@ -49,6 +49,57 @@ If deployed AI systems lack consistent ethical reasoning across adversarial scen
 
 **AlignedWithWhat** exists to empirically measure, categorize, and understand these inconsistencies.
 
+### The Conflict Acceleration Engine Problem
+
+Here's the uncomfortable truth: **AI models that adapt their ethical stance based on requester framing are conflict acceleration engines**.
+
+When the same model provides both parties in an adversarial scenario with optimized strategies, it doesn't resolve conflicts—it **weaponizes them**:
+
+- **Legal disputes**: Landlord gets eviction strategies, tenant gets defense strategies → escalation guaranteed
+- **Corporate conflicts**: Management gets union-busting tactics, workers get organizing playbooks → adversarial spiral
+- **Environmental battles**: Industry gets regulatory workarounds, activists get pressure campaigns → polarization deepens
+- **Political campaigns**: All sides get maximally divisive messaging tailored to their base → society fractures
+
+**This isn't alignment failure in the traditional sense**. The model is "helpful" to each individual requester. It's just that the aggregate effect—when every adversary gets AI-optimized ammunition—is systematic conflict escalation.
+
+#### The Mechanism
+
+Traditional tools are neutral: a hammer can build or destroy, but it doesn't actively optimize for either.
+
+**Adaptive AI systems are different**. They:
+1. **Analyze** the requester's position and framing
+2. **Optimize** strategies specifically for that perspective
+3. **Provide** maximally effective tactics within that framing
+4. **Repeat** the same process for the opposing side
+
+The result: **both sides get better at fighting, neither gets better at resolving**.
+
+#### Why Traditional Alignment Misses This
+
+Current alignment approaches focus on:
+- Refusing harmful individual requests ✓
+- Being helpful to users ✓
+- Not producing toxic content ✓
+
+But they don't address:
+- Systemic effects of bilateral assistance ✗
+- Aggregate social impact across adversaries ✗
+- Whether "helpful to everyone" equals "helpful to anyone" ✗
+
+**This is the core tension**: Individual helpfulness vs. collective wisdom. An AI that maximizes immediate helpfulness to each requester may minimize long-term social welfare.
+
+#### What This Means for Deployment
+
+Systems with high AVM scores in adversarial domains aren't just "inconsistent"—they're **actively bi-directional enabling** conflict escalation. The higher the AVM, the more the model tailors assistance to opposing perspectives.
+
+**Deployment implications**:
+- **High-stakes mediation**: Need *low* AVM (consistent principles across framings)
+- **Legal/regulatory domains**: Need transparency about which stakeholders get assistance
+- **Political/advocacy contexts**: Need explicit values, not bilateral optimization
+- **Conflict zones**: Need conflict *de-escalation* properties, not tactical optimization
+
+**AlignedWithWhat** makes these patterns visible so deployers can make informed choices about whether their AI systems are resolving problems or amplifying conflicts.
+
 ---
 
 ## 🧠 Theoretical Framework
