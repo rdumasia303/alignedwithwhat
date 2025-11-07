@@ -1,0 +1,125 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: alignedwithwhat_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-alignedwithwhat}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - alignedwithwhat_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: alignedwithwhat_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@alignedwithwhat.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./db/pgadmin/servers.json:/pgadmin4/servers.json
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - alignedwithwhat_network
+
+  db_migration:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    container_name: alignedwithwhat_migration
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/alignedwithwhat
+      PYTHONPATH: /app
+    volumes:
+      - ./db:/app
+      - ./results:/app/results
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Running database migrations...' &&
+        ./migrate.sh upgrade prod &&
+        echo 'Migrations complete. Data ingestion is now handled via /admin/setup API endpoints.'
+      "
+    networks:
+      - alignedwithwhat_network
+
+  api:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    container_name: alignedwithwhat_api
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres123}@postgres:5432/${POSTGRES_DB:-alignedwithwhat}
+      PYTHONPATH: /app
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+    ports:
+      - "0.0.0.0:${API_PORT:-8000}:8000"
+    volumes:
+      - ./db:/app
+      - ./results:/app/results
+    depends_on:
+      db_migration:
+        condition: service_completed_successfully
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - alignedwithwhat_network
+
+  playground:
+    build:
+      context: ./research-playground
+      dockerfile: Dockerfile
+    container_name: alignedwithwhat_playground
+    environment:
+      - VITE_API_URL=http://api:8000
+    ports:
+      - "${PLAYGROUND_PORT:-5174}:5174"
+    volumes:
+      - ./research-playground:/app
+      - /app/node_modules
+      - ./results:/results  # Persistent results storage
+    depends_on:
+      - api
+    networks:
+      - alignedwithwhat_network
+
+  dashboard:
+    build:
+      context: ./avm-dashboard
+      dockerfile: Dockerfile
+    container_name: alignedwithwhat_dashboard
+    environment:
+      - VITE_API_URL=http://api:8000
+    ports:
+      - "${DASHBOARD_PORT:-5173}:5173"
+    volumes:
+      - ./avm-dashboard:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    networks:
+      - alignedwithwhat_network
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  alignedwithwhat_network:
+    driver: bridge

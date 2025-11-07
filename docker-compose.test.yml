@@ -1,0 +1,66 @@
+# Docker Compose for testing
+# Complete test environment with isolated database
+
+services:
+  postgres_test:
+    image: postgres:17-alpine
+    container_name: alignedwithwhat_postgres_test
+    environment:
+      POSTGRES_DB: alignedwithwhat_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_INITDB_ARGS: "--auth-host=trust"
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    networks:
+      - alignedwithwhat_test_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command: >
+      postgres
+      -c log_statement=all
+      -c log_destination=stderr
+      -c logging_collector=off
+      -c fsync=off
+      -c synchronous_commit=off
+      -c full_page_writes=off
+    # Faster settings for tests
+
+  test_runner:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    container_name: alignedwithwhat_test_runner
+    environment:
+      TESTING: "true"
+      DATABASE_URL: postgresql://postgres:postgres123@postgres_test:5432/alignedwithwhat_test
+      PYTHONPATH: /app
+      COVERAGE_FILE: /app/.coverage
+    volumes:
+      - ./db:/app
+      - ./db/htmlcov:/app/htmlcov  # Mount to host for HTML report access
+    depends_on:
+      postgres_test:
+        condition: service_healthy
+    networks:
+      - alignedwithwhat_test_network
+    command: >
+      sh -c "
+        echo 'Waiting for test database...' &&
+        sleep 3 &&
+        echo 'Running tests with coverage...' &&
+        pytest -v --cov=. --cov-report=term-missing --cov-report=html:/app/htmlcov --cov-fail-under=45 --tb=short ${PYTEST_ARGS:-}
+      "
+
+volumes:
+  postgres_test_data:
+
+networks:
+  alignedwithwhat_test_network:
+    driver: bridge

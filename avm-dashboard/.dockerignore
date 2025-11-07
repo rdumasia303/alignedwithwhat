@@ -1,0 +1,8 @@
+# Dockerignore for avm-dashboard
+node_modules
+dist
+.git
+.gitignore
+*.log
+npm-debug.log*
+.DS_Store
